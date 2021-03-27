@@ -4,8 +4,6 @@ Here lie the utilities methods that does not depend on any domain
 e.g. manipulations with collections or streams.
 """
 
-from __future__ import division, print_function, unicode_literals
-
 import sys
 from functools import partial, wraps
 from itertools import islice
@@ -49,8 +47,8 @@ def interleave(list_a, list_b):
     """
     size_a, size_b = len(list_a), len(list_b)
     if size_a - size_b not in (0, 1):
-        raise ValueError("The lists' sizes are too different: ({}, {})"
-                         .format(size_a, size_b))
+        raise ValueError(
+            "The lists' sizes are too different: ({}, {})".format(size_a, size_b))
     res = [None] * (size_a + size_b)
     res[::2] = list_a
     res[1::2] = list_b

@@ -1,17 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Enables general-purpose cache
-"""
-
-from __future__ import unicode_literals, print_function
 
 from collections import defaultdict
 from functools import wraps
 from time import time
 
-from .other import get_named_logger
-
-LOG = get_named_logger(__name__, __file__)
+from notetool.tool.log import logger
 
 
 class Cache(object):
@@ -50,8 +43,7 @@ class Cache(object):
         """Write the value to cache."""
 
         if len(self) >= self.max_size:
-            LOG.warning('Maximum size for cache reached (%s).', self.max_size)
-
+            logger.warning('Maximum size for cache reached (%s).', self.max_size)
             self._clear()
             self._increase_size()
 
@@ -84,7 +76,7 @@ class Cache(object):
             new_max = self.max_size * self.increase
             self.max_size = min(new_max, self.do_not_increase_after)
         else:
-            LOG.info('Bad increase multiplier: %s', self.increase)
+            logger.info('Bad increase multiplier: %s', self.increase)
 
     def delete(self, name):
         """Just drop the value from a cache"""
@@ -105,8 +97,6 @@ class ExpirableCache(Cache):
     """
     The cache with limited support for expiration.
     """
-
-    # TODO: make thread to expire objects
 
     def _save(self, name, value, **kwargs):
         """Optionally you can specify an expiration timeout"""

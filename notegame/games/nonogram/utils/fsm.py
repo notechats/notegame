@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Defines basic finite state machine
-"""
 
-from __future__ import print_function, unicode_literals
 
+from notetool.tool.log import logger
 from six import iteritems, text_type
-
-
-from .other import get_named_logger
-
-LOG = get_named_logger(__name__, __file__)
 
 
 class StateMachineError(ValueError):
@@ -61,8 +53,8 @@ class FiniteStateMachine(object):
         Change the state of a machine according to the
         `self.state_map` by applying an `action`
         """
-        LOG.debug('Current state: %r', self.current_state)
-        LOG.debug('Action: %r', action)
+        logger.debug('Current state: %r', self.current_state)
+        logger.debug('Action: %r', action)
 
         if action not in self.actions:
             raise StateMachineError("Action '{}' not available".format(
@@ -74,7 +66,7 @@ class FiniteStateMachine(object):
                 action, self.current_state), code=StateMachineError.BAD_TRANSITION)
         else:
             self._state = new_state
-            LOG.debug('New state: %r', self.current_state)
+            logger.debug('New state: %r', self.current_state)
             return self.current_state
 
     def reaction(self, action, current_state=None):
@@ -143,20 +135,19 @@ class FiniteStateMachine(object):
             raise RuntimeError('Cannot match: no final state defined')
 
         for letter in word:
-            LOG.debug('Match letter %r of word %r', letter, word)
+            logger.debug('Match letter %r of word %r', letter, word)
             try:
                 prev = self.current_state
                 self.transition(letter)
-                LOG.info('Transition from %r to %r with action %r',
-                         prev, self.current_state, letter)
+                logger.info('Transition from %r to %r with action %r',
+                            prev, self.current_state, letter)
             except StateMachineError:
-                LOG.info('Cannot do action %r in the state %r',
-                         letter, self.current_state)
+                logger.info('Cannot do action %r in the state %r',
+                            letter, self.current_state)
                 return False
 
         return self.current_state == self.final_state
 
     def __copy__(self):
-        new_one = type(self)(self.initial_state,
-                             self.state_map, final=self.final_state)
+        new_one = type(self)(self.initial_state, self.state_map, final=self.final_state)
         return new_one

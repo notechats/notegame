@@ -3,7 +3,6 @@
 Based on Matteo Dell'Amico's solution
 https://gist.github.com/matteodellamico/4451520
 """
-from __future__ import unicode_literals, print_function, division
 
 from heapq import heapify, heappush, heappop
 
@@ -35,8 +34,8 @@ class PriorityDict(dict):
         heapify(self._heap)
 
     def smallest(self):
-        """Return the item with the lowest priority.
-
+        """
+        Return the item with the lowest priority.
         Raises IndexError if the object is empty.
         """
 
@@ -48,7 +47,8 @@ class PriorityDict(dict):
         return key, val
 
     def pop_smallest(self):
-        """Return the item with the lowest priority and remove it.
+        """
+        Return the item with the lowest priority and remove it.
 
         Raises IndexError if the object is empty.
         """
@@ -61,8 +61,10 @@ class PriorityDict(dict):
         return key, val
 
     def __setitem__(self, key, val):
-        # We are not going to remove the previous value from the heap,
-        # since this would have a cost O(n).
+        """
+        We are not going to remove the previous value from the heap,
+        since this would have a cost O(n).
+        """
 
         super(PriorityDict, self).__setitem__(key, val)
 
@@ -80,16 +82,18 @@ class PriorityDict(dict):
         return self[key]
 
     def update(self, *args, **kwargs):
-        # Reimplementing dict.update is tricky -- see e.g.
-        # http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
-        # We just rebuild the heap from scratch after passing to super.
+        """
+        Reimplementing dict.update is tricky -- see e.g.
+        http://mail.python.org/pipermail/python-ideas/2007-May/000744.html
+        We just rebuild the heap from scratch after passing to super.
+        """
 
         super(PriorityDict, self).update(*args, **kwargs)
         self._rebuild_heap()
 
     def sorted_iter(self):
-        """Sorted iterator of the priority dictionary items.
-
+        """
+        Sorted iterator of the priority dictionary items.
         Beware: this will destroy elements as they are returned.
         """
 
