@@ -6,23 +6,19 @@ See details:
 https://www.cs.bgu.ac.il/~benr/nonograms/
 """
 
-from __future__ import unicode_literals
-
-import logging
 from collections import defaultdict
 from functools import reduce
 from itertools import product
 
+from notetool.tool.log import logger
 from six.moves import range, zip
 
-from ...utils.iter import expand_generator, max_continuous_interval
-from ...utils.other import from_two_powers, two_powers
-from ..color import ColorBlock
-from ..common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, BlottedBlock,
-                      partial_sums, slack_space)
+from ..core.color import ColorBlock
+from ..core.common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, BlottedBlock,
+                           partial_sums, slack_space)
+from ..utils.iter import expand_generator, max_continuous_interval
+from ..utils.other import from_two_powers, two_powers
 from .base import BaseLineSolver, NonogramError, TrimmedSolver
-
-LOG = logging.getLogger(__name__)
 
 # dummy constant
 BOTH_COLORS = -1
@@ -393,7 +389,7 @@ class BlottedSolver(BaseLineSolver):
         if other is None:
             return one
 
-        LOG.debug('Merging two solutions: %r and %r', one, other)
+        logger.debug('Merging two solutions: %r and %r', one, other)
         return [cls._single_color(set(cells))
                 for cells in zip(one, other)]
 
@@ -407,12 +403,12 @@ class BlottedSolver(BaseLineSolver):
             return super(BlottedSolver, cls).solve(description, line)
 
         if cls.is_solved(description, line):
-            LOG.info('No need to solve blotted line: %r', line)
+            logger.info('No need to solve blotted line: %r', line)
             return line
 
         blotted_desc, line = tuple(description), tuple(line)
-        LOG.warning('Solving line %r with blotted description %r',
-                    line, blotted_desc)
+        logger.warning('Solving line %r with blotted description %r',
+                       line, blotted_desc)
 
         blotted_positions = [index for index, block in enumerate(blotted_desc)
                              if cls._is_blotted(block)]
@@ -429,29 +425,29 @@ class BlottedSolver(BaseLineSolver):
                 block = current_description[pos]
                 current_description[pos] = cls._update_block(block, block_size)
 
-            LOG.debug('Trying %i-th combination %r',
-                      index, current_description)
+            logger.debug('Trying %i-th combination %r',
+                         index, current_description)
 
             try:
                 solved = tuple(super(BlottedSolver, cls).solve(
                     current_description, line))
             except NonogramError:
-                LOG.debug('Combination %r is invalid for line %r',
-                          current_description, line)
+                logger.debug('Combination %r is invalid for line %r',
+                             current_description, line)
             else:
                 solution = cls.merge_solutions(solved, solution)
-                LOG.debug('Merged solution: %s', solution)
+                logger.debug('Merged solution: %s', solution)
                 if tuple(solution) == line:
-                    LOG.warning('The combination %r (description=%r) is valid but '
-                                'brings no new information. Stopping the combinations search.',
-                                combination, current_description)
+                    logger.warning('The combination %r (description=%r) is valid but '
+                                   'brings no new information. Stopping the combinations search.',
+                                   combination, current_description)
                     break
 
         if not solution:
             raise NonogramError(
                 'Cannot solve with blotted clues {!r}'.format(blotted_desc))
 
-        LOG.info('United solution from all combinations: %r', solution)
+        logger.info('United solution from all combinations: %r', solution)
         assert len(solution) == len(line)
         return tuple(solution)
 
@@ -531,7 +527,7 @@ class BguColoredBlottedSolver(TrimmedSolver, BlottedSolver, BguColoredSolver):
                 allowed_colors_positions[single_color].append(index)
 
         min_start_indexes = cls.calc_block_sum(description)[1:]
-        LOG.debug(min_start_indexes)
+        logger.debug(min_start_indexes)
 
         for block_index, block in enumerate(description):
             color = block.color
@@ -547,15 +543,15 @@ class BguColoredBlottedSolver(TrimmedSolver, BlottedSolver, BguColoredSolver):
 
             min_index_shift = min(rang) - min_index
             if min_index_shift > 0:
-                LOG.info('Minimum starting index for block #%i (%r) updated: %i --> %i',
-                         block_index, block, min_index, min_index + min_index_shift)
+                logger.info('Minimum starting index for block #%i (%r) updated: %i --> %i',
+                            block_index, block, min_index, min_index + min_index_shift)
 
                 min_start_indexes[block_index:] = [
                     i + min_index_shift for i in min_start_indexes[block_index:]]
 
             yield rang
 
-        LOG.debug(min_start_indexes)
+        logger.debug(min_start_indexes)
 
     @classmethod
     @expand_generator
@@ -586,7 +582,7 @@ class BguColoredBlottedSolver(TrimmedSolver, BlottedSolver, BguColoredSolver):
         ranges = cls.block_ranges(description, line)
 
         for block, rang in zip(description, ranges):
-            LOG.info('%s --> %s', block, rang)
+            logger.info('%s --> %s', block, rang)
 
         for block, rang in zip(description, ranges):
             if cls._is_blotted(block):
@@ -599,8 +595,8 @@ class BguColoredBlottedSolver(TrimmedSolver, BlottedSolver, BguColoredSolver):
                 sizes.append(valid_range)
 
         total_variations = tuple(map(len, sizes))
-        LOG.warning('Go through %i combinations: %s',
-                    reduce(lambda x, y: x * y, total_variations), total_variations)
+        logger.warning('Go through %i combinations: %s',
+                       reduce(lambda x, y: x * y, total_variations), total_variations)
 
         for combination in product(*sizes):
             if sum(combination) <= max_sum:
