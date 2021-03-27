@@ -3,39 +3,16 @@
 Defines various renderers for the game of nonogram
 """
 
-from __future__ import division, print_function, unicode_literals
-
-import codecs
-import logging
+from abc import ABC
 from itertools import combinations
 from sys import stdout
 
-from six import PY2, integer_types, iteritems, itervalues, text_type
-
-from ..utils.iter import max_safe, pad, split_seq
-from ..utils.other import from_two_powers, two_powers
-from .common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, BlottedBlock, Color,
-                     is_color_cell, is_list_like)
-
-try:
-    from abc import ABC
-except ImportError:
-    from abc import ABCMeta
-
-    # https://stackoverflow.com/a/38668373
-    ABC = ABCMeta(str('ABC'), (object,), {'__slots__': ()})
-
-
-
-
-_LOG_NAME = __name__
-LOG = logging.getLogger(_LOG_NAME)
-
-
-# prevent "UnicodeEncodeError: 'ascii' codec can't encode character ..."
-# when redirecting output
-if PY2:
-    stdout = codecs.getwriter('utf8')(stdout)
+from notegame.games.nonogram.core.common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, BlottedBlock, Color,
+                                                 is_color_cell, is_list_like)
+from notegame.games.nonogram.utils.iter import max_safe, pad, split_seq
+from notegame.games.nonogram.utils.other import from_two_powers, two_powers
+from notetool.tool.log import logger
+from six import integer_types, iteritems, itervalues, text_type
 
 
 class Cell(object):
@@ -153,8 +130,8 @@ class Renderer(object):
     def board_init(self, board=None):
         """Initialize renderer's properties dependent on board it draws"""
         if board:
-            LOG.info('Init %r renderer with board %r',
-                     self.__class__.__name__, board)
+            logger.info('Init %r renderer with board %r',
+                        self.__class__.__name__, board)
         else:
             if self.board:
                 return  # already initialized, do nothing
@@ -247,7 +224,7 @@ class BaseAsciiRenderer(StreamRenderer):
 
     def board_init(self, board=None):
         super(BaseAsciiRenderer, self).board_init(board)
-        LOG.info('init cells: %sx%s', self.full_width, self.full_width)
+        logger.info('init cells: %sx%s', self.full_width, self.full_width)
 
         self.cells = [[Cell()] * self.full_width
                       for _ in range(self.full_height)]
@@ -611,8 +588,8 @@ class SvgRenderer(StreamRenderer):
 
         if self.is_colored:
             for (color_name, fill_color), (color_name2, fill_color2) in combinations(colors, 2):
-                LOG.info('Transient symbol: %s, %s + %s, %s',
-                         color_name, fill_color, color_name2, fill_color2)
+                logger.info('Transient symbol: %s, %s + %s, %s',
+                            color_name, fill_color, color_name2, fill_color2)
                 color_tuple = (color_name, color_name2)
 
                 self._add_symbol(
@@ -629,10 +606,10 @@ class SvgRenderer(StreamRenderer):
 
             for (color_name, fill_color), (color_name2, fill_color2), (
                     color_name3, fill_color3) in combinations(colors, 3):
-                LOG.info('Transient symbol: %s, %s + %s, %s + %s, %s',
-                         color_name, fill_color,
-                         color_name2, fill_color2,
-                         color_name3, fill_color3)
+                logger.info('Transient symbol: %s, %s + %s, %s + %s, %s',
+                            color_name, fill_color,
+                            color_name2, fill_color2,
+                            color_name3, fill_color3)
                 color_tuple = (color_name, color_name2, color_name3)
 
                 self._add_symbol(
