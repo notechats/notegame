@@ -4,8 +4,6 @@ Here lie the utilities methods that does not depend on any domain
 e.g. manipulations with collections or streams.
 """
 
-from __future__ import division, print_function, unicode_literals
-
 import logging
 import multiprocessing
 import os
@@ -15,10 +13,8 @@ from datetime import datetime
 from functools import wraps
 from threading import Lock
 
-from six import iteritems, text_type
-
 from memoized import memoized
-
+from six import iteritems, text_type
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 START_TIME = datetime.now()

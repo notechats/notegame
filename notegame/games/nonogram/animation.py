@@ -3,26 +3,15 @@
 Defines various renderers for the game of nonogram
 """
 
-from __future__ import print_function, unicode_literals
-
+import curses
 import locale
-import logging
 import time
 
+from notetool.tool.log import logger
 from six import itervalues, string_types
 from six.moves import queue
 
-from .core.renderer import BaseAsciiRenderer
-
-try:
-    import curses
-except ImportError:
-    curses = None
-
-
-
-_LOG_NAME = __name__
-LOG = logging.getLogger(_LOG_NAME)
+from notegame.games.nonogram.core.renderer import BaseAsciiRenderer
 
 # need for unicode support on PY2 (however pypy2 does not work)
 # https://docs.python.org/2/library/curses.html
@@ -77,7 +66,8 @@ class StringsPager(object):
         allow_to_hide = int(len(self.lines) / 3)
 
         # we should be able to see the lower edge anyway
-        max_offset = max(len(self.lines) - self.window_height + 1, allow_to_hide)
+        max_offset = max(len(self.lines) -
+                         self.window_height + 1, allow_to_hide)
 
         if self.vertical_offset < max_offset:
             if full:
@@ -281,7 +271,7 @@ class StringsPager(object):
             else:
                 idle_updates_counter += 1
                 if idle_updates_counter >= max_idle_updates:
-                    LOG.info('Pause curses for %s seconds...', idle_timeout)
+                    logger.info('Pause curses for %s seconds...', idle_timeout)
                     time.sleep(idle_timeout)
                     idle_updates_counter = 0
 
