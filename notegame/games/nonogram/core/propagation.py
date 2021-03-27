@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 """Define nonogram solver that solves line-by-line"""
 
-
-import logging
 import time
 
+from notetool.tool.log import logger
 from six.moves import range, zip
 
+from ..solver import solve_line
 from ..utils.priority_dict import PriorityDict
 from .common import BOX, SPACE, UNKNOWN, is_color_cell
-from .line import solve_line
-
-LOG = logging.getLogger(__name__)
 
 
 def _is_pixel_updated(old, new):
@@ -155,8 +152,8 @@ def _solve_with_method(
     # when adding column, `is_column = True = 1`
     # heap always pops the lowest item, so the rows will go first
 
-    LOG.debug('Solving %s rows and %s columns with %r method',
-              row_indexes, column_indexes, method)
+    logger.debug('Solving %s rows and %s columns with %r method',
+                 row_indexes, column_indexes, method)
 
     line_jobs = PriorityDict()
     all_jobs = set()
@@ -235,7 +232,7 @@ def _solve_with_method(
         # if rate != 1:
         #     LOG.warning('The nonogram is not solved full (%r). The rate is %.4f',
         #                 method, rate)
-        LOG.info('Full solution: %.6f sec', time.time() - start)
-        LOG.info('Lines solved: %i', lines_solved)
+        logger.info('Full solution: %.6f sec', time.time() - start)
+        logger.info('Lines solved: %i', lines_solved)
 
     return total_cells_solved, all_jobs

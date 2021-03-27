@@ -7,6 +7,8 @@ import logging
 from notegame.games.nonogram.core.common import (normalize_description,
                                                  normalize_row)
 
+from notegame.games.nonogram.core.common import (normalize_description,                                                normalize_row)
+
 from . import bgu, efficient, machine, simpson
 
 # TODO: choose the method for each registered solver
@@ -17,7 +19,6 @@ SOLVERS = {
     'simpson': simpson.FastSolver,
 
     'bgu': bgu.BguSolver,
-
     'blot': bgu.BguBlottedSolver,
 
     'efficient': efficient.EfficientSolver,
