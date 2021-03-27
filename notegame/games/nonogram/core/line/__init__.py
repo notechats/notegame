@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 """Define nonogram solving operations"""
 
-from __future__ import unicode_literals, print_function
 
 import logging
 
-from pynogram.core.common import (
-    normalize_row, normalize_description,
-)
-from pynogram.core.line import (
-    bgu,
-    efficient,
-    machine,
-    simpson,
-)
+from notegame.games.nonogram.core.common import (normalize_description,
+                                                 normalize_row)
+from notegame.games.nonogram.core.line import bgu, efficient, machine, simpson
 
 # TODO: choose the method for each registered solver
 SOLVERS = {

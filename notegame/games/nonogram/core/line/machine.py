@@ -6,34 +6,21 @@ See source article (in russian):
 http://window.edu.ru/resource/781/57781
 """
 
-from __future__ import unicode_literals, print_function
-
-import logging
-
-from six import (
-    iteritems, itervalues,
-)
+from notetool.tool.log import logger
+from six import iteritems, itervalues
 from six.moves import range
 
-from pynogram.core.common import (
-    UNKNOWN, BOX, SPACE, SPACE_COLORED,
-    normalize_description, normalize_row,
-    is_list_like,
-    NonogramError,
-)
-from pynogram.core.line.base import BaseLineSolver
-from pynogram.core.line.simpson import FastSolver
-from pynogram.utils import fsm
-from pynogram.utils.cache import Cache
-from pynogram.utils.iter import expand_generator
-from pynogram.utils.other import (
-    two_powers, from_two_powers,
-    get_named_logger,
-)
-
-LOG = get_named_logger(__name__, __file__)
-
-fsm.LOG.setLevel(logging.WARNING)
+from notegame.games.nonogram.core.common import (BOX, SPACE, SPACE_COLORED,
+                                                 UNKNOWN, NonogramError,
+                                                 is_list_like,
+                                                 normalize_description,
+                                                 normalize_row)
+from notegame.games.nonogram.core.line.base import BaseLineSolver
+from notegame.games.nonogram.core.line.simpson import FastSolver
+from notegame.games.nonogram.utils import fsm
+from notegame.games.nonogram.utils.cache import Cache
+from notegame.games.nonogram.utils.iter import expand_generator
+from notegame.games.nonogram.utils.other import from_two_powers, two_powers
 
 
 class NonogramFSM(fsm.FiniteStateMachine):
@@ -46,7 +33,8 @@ class NonogramFSM(fsm.FiniteStateMachine):
         self.description = description
         initial_state = state_map[0][1]
         final = state_map[-1][1]
-        super(NonogramFSM, self).__init__(initial_state, state_map, final=final)
+        super(NonogramFSM, self).__init__(
+            initial_state, state_map, final=final)
 
     @classmethod
     def _space(cls):
@@ -92,7 +80,7 @@ class NonogramFSM(fsm.FiniteStateMachine):
         from the description
         given in a nonogram definition
         """
-        LOG.debug('Clues: %s', description)
+        logger.debug('Clues: %s', description)
 
         state_counter = cls.INITIAL_STATE
 
@@ -107,25 +95,26 @@ class NonogramFSM(fsm.FiniteStateMachine):
             # if it is not a first block AND the previous block was of the same color
             if prev_color == color:
                 trans, state_counter = cls._required_space(state_counter)
-                LOG.debug('Add transition: %s -> %s', trans, state_counter)
+                logger.debug('Add transition: %s -> %s', trans, state_counter)
                 yield trans, state_counter
 
             # it CAN be multiple spaces before every block
             trans, state_counter = cls._optional_space(state_counter)
-            LOG.debug('Add transition: %s -> %s', trans, state_counter)
+            logger.debug('Add transition: %s -> %s', trans, state_counter)
             yield trans, state_counter
 
             # the block of some color
             for _ in range(value):
-                trans, state_counter = cls._required_color(state_counter, color)
-                LOG.debug('Add transition: %s -> %s', trans, state_counter)
+                trans, state_counter = cls._required_color(
+                    state_counter, color)
+                logger.debug('Add transition: %s -> %s', trans, state_counter)
                 yield trans, state_counter
 
             prev_color = color
 
         # at the end of the line can be optional spaces
         trans, state_counter = cls._optional_space(state_counter)
-        LOG.debug('Add transition: %s -> %s', trans, state_counter)
+        logger.debug('Add transition: %s -> %s', trans, state_counter)
         yield trans, state_counter
 
     def partial_match(self, row):
@@ -146,30 +135,34 @@ class NonogramFSM(fsm.FiniteStateMachine):
                 step_possible_states = []
                 for state in possible_states:
                     if cell in (BOX, UNKNOWN):
-                        LOG.debug('Check the ability to insert BOX')
+                        logger.debug('Check the ability to insert BOX')
 
                         next_step = self.reaction(BOX, current_state=state)
                         if next_step is None:
-                            LOG.debug('Cannot go from state %r with BOX', state)
+                            logger.debug(
+                                'Cannot go from state %r with BOX', state)
                         else:
                             step_possible_states.append(next_step)
 
                     if cell in (SPACE, UNKNOWN):
-                        LOG.debug('Check the ability to insert SPACE')
+                        logger.debug('Check the ability to insert SPACE')
 
                         next_step = self.reaction(SPACE, current_state=state)
                         if next_step is None:
-                            LOG.debug('Cannot go from state %r with SPACE', state)
+                            logger.debug(
+                                'Cannot go from state %r with SPACE', state)
                         else:
                             step_possible_states.append(next_step)
 
                 if not step_possible_states:
                     return False
 
-                LOG.debug('Possible states after step %s: %s', i, step_possible_states)
+                logger.debug('Possible states after step %s: %s',
+                             i, step_possible_states)
                 possible_states = set(step_possible_states)
 
-            LOG.debug('Possible states after full scan: %s', possible_states)
+            logger.debug('Possible states after full scan: %s',
+                         possible_states)
             return self.final_state in possible_states
         finally:
             self._state = save_state
@@ -189,18 +182,18 @@ class NonogramFSM(fsm.FiniteStateMachine):
             if cell in (BOX, SPACE):
                 continue
 
-            LOG.debug('Trying to guess the %s cell', i)
+            logger.debug('Trying to guess the %s cell', i)
 
             temp_row = list(original_row)
             temp_row[i] = BOX
             can_be_box = self.partial_match(temp_row)
-            LOG.debug('The %s cell can%s be a BOX',
-                      i, '' if can_be_box else 'not')
+            logger.debug('The %s cell can%s be a BOX',
+                         i, '' if can_be_box else 'not')
 
             temp_row[i] = SPACE
             can_be_space = self.partial_match(temp_row)
-            LOG.debug('The %s cell can%s be a SPACE',
-                      i, '' if can_be_space else 'not')
+            logger.debug('The %s cell can%s be a SPACE',
+                         i, '' if can_be_space else 'not')
 
             if can_be_box:
                 if not can_be_space:
@@ -232,12 +225,13 @@ class NonogramFSM(fsm.FiniteStateMachine):
         def _shift_one_cell(cell_type, trans_index,
                             previous_step_state, previous_state, desc_cell=None):
             if desc_cell:  # pragma: no cover
-                LOG.debug('Add states with %s transition', desc_cell)
+                logger.debug('Add states with %s transition', desc_cell)
 
             new_state = self.reaction(cell_type, previous_state)
             if new_state is None:
                 if desc_cell:  # pragma: no cover
-                    LOG.debug('Cannot go from %s with the %s cell', previous_state, desc_cell)
+                    logger.debug('Cannot go from %s with the %s cell',
+                                 previous_state, desc_cell)
             else:
                 transition_table.append_transition(
                     trans_index, new_state, previous_step_state, cell_type)
@@ -278,7 +272,8 @@ class NonogramFSM(fsm.FiniteStateMachine):
             raise NonogramError('Bad transition table: final state {!r} not found'.format(
                 self.final_state))
 
-        reversed_states = list(transition_table.reverse_tracking(self.final_state))
+        reversed_states = list(
+            transition_table.reverse_tracking(self.final_state))
         solved_row = (
             self._cell_value_from_solved(states)
             for states in reversed(reversed_states))
@@ -522,4 +517,5 @@ def assert_match(row_desc, row):
 
     nfsm = BaseMachineSolver.make_nfsm(row_desc)
     if not nfsm.match(row):
-        raise NonogramError('The row {!r} cannot fit in clue {!r}'.format(row, row_desc))
+        raise NonogramError(
+            'The row {!r} cannot fit in clue {!r}'.format(row, row_desc))
