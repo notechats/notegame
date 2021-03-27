@@ -6,19 +6,11 @@ See details:
 http://www.lancaster.ac.uk/~simpsons/nonogram/ls-fast
 """
 
-from __future__ import unicode_literals, print_function
-
-import logging
-
+from notetool.tool.log import logger
 from six.moves import range
 
-from pynogram.core.common import (
-    BOX, SPACE, UNKNOWN,
-    NonogramError,
-)
-from pynogram.core.line.base import BaseLineSolver
-
-LOG = logging.getLogger(__name__)
+from ..core.common import BOX, SPACE, UNKNOWN, NonogramError
+from .base import BaseLineSolver
 
 _SYMBOL_MAP = {
     UNKNOWN: ' ',
@@ -51,8 +43,8 @@ class FastSolver(BaseLineSolver):
         if clue_size > 0:
             res[current_block] = 0
 
-        LOG.info('Pushing clue: %s', ', '.join(map(str, clue)))
-        LOG.info('Pushing line: >%s<', ''.join(
+        logger.info('Pushing clue: %s', ', '.join(map(str, clue)))
+        logger.info('Pushing line: >%s<', ''.join(
             _SYMBOL_MAP.get(cell, '?') for cell in line))
 
         while current_block < clue_size:
@@ -62,7 +54,8 @@ class FastSolver(BaseLineSolver):
             pos = res[current_block]
             block_size = clue[current_block]
 
-            LOG.debug('     start %d >%s %d', current_block, pos, block_size)
+            logger.debug('     start %d >%s %d',
+                         current_block, pos, block_size)
 
             while pos < line_size - block_size:
                 cell = line[pos]
@@ -72,11 +65,12 @@ class FastSolver(BaseLineSolver):
                 pos += 1
 
             res[current_block] = pos
-            LOG.debug('     end %d >%s %d', current_block, pos, block_size)
+            logger.debug('     end %d >%s %d', current_block, pos, block_size)
 
             # no room left
             if (pos + block_size > line_size) or (line[pos] == SPACE):
-                raise NonogramError('No room left: cannot fit %d-th block' % current_block)
+                raise NonogramError(
+                    'No room left: cannot fit %d-th block' % current_block)
 
             # assume current position doesn't cover a solid
             solid[current_block] = -1
@@ -90,14 +84,14 @@ class FastSolver(BaseLineSolver):
                     break
 
                 if (solid[current_block] < 0) and (cell == BOX):
-                    LOG.debug('     solid %d >%s#',
-                              current_block, (pos + i))
+                    logger.debug('     solid %d >%s#',
+                                 current_block, (pos + i))
                     solid[current_block] = i
                 i += 1
 
             # if a dot was encountered...
             if i < block_size:
-                LOG.debug('     dot %d >%s-', current_block, (pos + i))
+                logger.debug('     dot %d >%s-', current_block, (pos + i))
 
                 # if a solid is covered, get an earlier current_block to fit
                 if solid[current_block] >= 0:
@@ -105,7 +99,8 @@ class FastSolver(BaseLineSolver):
                     # covered by the next current_block without uncovering its own
                     while True:
                         if current_block == 0:
-                            raise NonogramError('All previous blocks cover solids')
+                            raise NonogramError(
+                                'All previous blocks cover solids')
                         current_block -= 1
                         if (solid[current_block] < 0) or (
                                 res[current_block + 1] + solid[current_block + 1] -
@@ -117,7 +112,8 @@ class FastSolver(BaseLineSolver):
                     # so that it just overlaps the solid, and try again
                     next_pos = res[current_block + 1]
                     next_solid = solid[current_block + 1]
-                    res[current_block] = next_pos + next_solid - clue[current_block] + 1
+                    res[current_block] = next_pos + \
+                        next_solid - clue[current_block] + 1
                     continue
 
                 # otherwise, simply move to the dot, and try again
@@ -149,14 +145,16 @@ class FastSolver(BaseLineSolver):
 
             res[current_block] = pos
 
-            LOG.debug('     shuffle %s >%s %d', current_block, pos, block_size)
+            logger.debug('     shuffle %s >%s %d',
+                         current_block, pos, block_size)
 
             # if there's still a solid immediately after the current_block, there's
             # an error, so find an earlier current_block to move
             if pos + block_size < line_size:
                 end_block_cell = line[pos + block_size]
                 if end_block_cell == BOX:
-                    LOG.debug('     stretched %d >%s#', current_block, (pos + i))
+                    logger.debug('     stretched %d >%s#',
+                                 current_block, (pos + i))
 
                     # find an earlier current_block that isn't covering a solid
                     error_block = current_block
@@ -175,7 +173,8 @@ class FastSolver(BaseLineSolver):
                     # so that it just overlaps the solid, and try again
                     next_pos = res[current_block + 1]
                     next_solid = solid[current_block + 1]
-                    res[current_block] = next_pos + next_solid - clue[current_block] + 1
+                    res[current_block] = next_pos + \
+                        next_solid - clue[current_block] + 1
                     continue
 
             # the current_block is in place, so try the next
@@ -194,7 +193,7 @@ class FastSolver(BaseLineSolver):
 
                 # if a solid was found...
                 if pos < line_size:
-                    LOG.debug('     trailing >%s#', pos)
+                    logger.debug('     trailing >%s#', pos)
 
                     # move the current_block so it covers it, but check if solid
                     # becomes uncovered
@@ -205,7 +204,8 @@ class FastSolver(BaseLineSolver):
                         # find an earlier current_block that isn't covering a solid
                         while True:
                             if current_block == 0:
-                                raise NonogramError('All previous blocks cover solids')
+                                raise NonogramError(
+                                    'All previous blocks cover solids')
                             current_block -= 1
                             if (solid[current_block] < 0) or (
                                     res[current_block + 1] +
@@ -217,7 +217,8 @@ class FastSolver(BaseLineSolver):
                         # so that it just overlaps the solid, and try again
                         next_pos = res[current_block + 1]
                         next_solid = solid[current_block + 1]
-                        res[current_block] = next_pos + next_solid - clue[current_block] + 1
+                        res[current_block] = next_pos + \
+                            next_solid - clue[current_block] + 1
 
                         continue
                     # if (solid[current_block] >= 0) ... }
@@ -253,7 +254,7 @@ class FastSolver(BaseLineSolver):
         line_size = len(line)
         clue_size = len(clue)
 
-        LOG.debug('Line range = %s to %s', 0, line_size - 1)
+        logger.debug('Line range = %s to %s', 0, line_size - 1)
 
         if (clue_size == 1) and clue[0] == 0:
             clue_size = 0
@@ -262,40 +263,44 @@ class FastSolver(BaseLineSolver):
 
         left_desc = []
         for block in range(clue_size):
-            left_desc.append('(%s + %s)' % (left_positions[block], clue[block]))
-        LOG.info('Left: %s', ' '.join(left_desc))
+            left_desc.append('(%s + %s)' %
+                             (left_positions[block], clue[block]))
+        logger.info('Left: %s', ' '.join(left_desc))
         left_desc = []
         for block in range(clue_size):
             size_now = sum(map(len, left_desc))
-            block = ('-' * (left_positions[block] - size_now)) + ('#' * clue[block])
+            block = (
+                '-' * (left_positions[block] - size_now)) + ('#' * clue[block])
             left_desc.append(block)
 
         desc_size = len(''.join(left_desc))
         left_desc.append('-' * (line_size - desc_size))
-        LOG.info('Left: >%s<', ''.join(left_desc))
+        logger.info('Left: >%s<', ''.join(left_desc))
 
         middle_desc = [_SYMBOL_MAP.get(cell, '?') for cell in line]
-        LOG.info('Middle: >%s<', ''.join(middle_desc))
+        logger.info('Middle: >%s<', ''.join(middle_desc))
 
-        LOG.info('Line range = %d to %d', 0, line_size - 1)
+        logger.info('Line range = %d to %d', 0, line_size - 1)
 
         right_positions = self.push_right(line, clue)
 
         right_desc = []
         for block in range(clue_size):
-            right_desc.append('(%s + %s)' % (right_positions[block], clue[block]))
-        LOG.info('Right: %s', ' '.join(right_desc))
+            right_desc.append('(%s + %s)' %
+                              (right_positions[block], clue[block]))
+        logger.info('Right: %s', ' '.join(right_desc))
         right_desc = []
         for block in range(clue_size):
             size_now = sum(map(len, right_desc))
-            dots = '-' * (line_size - right_positions[block] - clue[block] - size_now)
+            dots = '-' * \
+                (line_size - right_positions[block] - clue[block] - size_now)
             solids = '#' * (clue[block])
             block = dots + solids
             right_desc.append(block)
 
         desc_size = len(''.join(right_desc))
         right_desc.append('-' * (line_size - desc_size))
-        LOG.info('Right: >%s<', ''.join(right_desc))
+        logger.info('Right: >%s<', ''.join(right_desc))
 
         work = list(line)
 
