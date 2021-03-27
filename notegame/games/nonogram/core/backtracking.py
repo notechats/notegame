@@ -185,7 +185,7 @@ class Solver(object):
             before_contradiction = None
 
         pos = cell_state.position
-        logger.info('Found contradiction at (%i, %i)' % (*pos))
+        logger.info('Found contradiction at (%i, %i)' , *pos)
         try:
             board.unset_color(cell_state)
         except ValueError as ex:
