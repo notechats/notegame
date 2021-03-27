@@ -114,7 +114,7 @@ class Solver(object):
         :type cell_state: CellState
         """
         board = self.board
-        logger.debug('Assume that (%i, %i) is %s' % (*tuple(cell_state)))
+        logger.debug('Assume that (%i, %i) is %s',  *tuple(cell_state))
 
         board.set_color(cell_state)
 
