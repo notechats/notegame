@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-All about nonogram colors
-"""
 
-from __future__ import print_function, unicode_literals
 
 import re
 import string
 from collections import OrderedDict, namedtuple
 
+from notetool.tool.log import logger
 from six import integer_types, itervalues, string_types
 
-from ..utils.iter import expand_generator
-from ..utils.other import get_named_logger
-
-LOG = get_named_logger(__name__, __file__)
+from notegame.games.nonogram.core.common import (BlottedBlock,
+                                                 normalize_description)
+from notegame.games.nonogram.utils.iter import expand_generator
 
 
 class Color(object):
@@ -131,7 +127,7 @@ class ColorMap(OrderedDict):
 
         if name in self:
             color = self[name]
-            LOG.info('Color %r already found: %r', name, color)
+            logger.info('Color %r already found: %r', name, color)
 
             color.rgb = rgb
             if symbol is not None:
@@ -188,7 +184,6 @@ _COLOR_DESCRIPTION_RE = re.compile('([0-9]+)(.+)')
 @expand_generator(type_=tuple)
 def normalize_description_colored(row, color_map):
     """Normalize a colored nonogram description"""
-    from pynogram.core.common import normalize_description, BlottedBlock
 
     row = normalize_description(row, color=True)
 
