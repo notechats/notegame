@@ -3,7 +3,6 @@
 Defines the basic terms and functions for nonogram game
 """
 
-from __future__ import print_function, unicode_literals
 
 from six import integer_types, iteritems, string_types, with_metaclass
 from six.moves import range

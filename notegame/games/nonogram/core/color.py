@@ -8,9 +8,7 @@ from collections import OrderedDict, namedtuple
 from notetool.tool.log import logger
 from six import integer_types, itervalues, string_types
 
-from notegame.games.nonogram.core.common import (BlottedBlock,
-                                                 normalize_description)
-from notegame.games.nonogram.utils.iter import expand_generator
+from ..utils.iter import expand_generator
 
 
 class Color(object):
