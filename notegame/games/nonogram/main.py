@@ -4,21 +4,11 @@ The program's entry point
 """
 
 import json
-import locale
-import logging
-from datetime import datetime
-from threading import Thread
 
-from six import text_type
-from six.moves import queue
-
-from notegame.games.nonogram.animation import CursesRenderer, StringsPager
 from notegame.games.nonogram.core.backtracking import Solver
 from notegame.games.nonogram.core.board import make_board
-from notegame.games.nonogram.core.common import BOX
 from notegame.games.nonogram.core.renderer import BaseAsciiRenderer
 from notegame.games.nonogram.reader import read_example
-from notegame.games.nonogram.utils.other import ignored
 
 try:
     import curses
@@ -57,64 +47,11 @@ def solve(d_board, draw_final=False, draw_probes=False, **solver_args):
             print(json.dumps(solver.search_map.to_dict(), indent=1))
 
 
-class PagerWithUptime(StringsPager):
-    """
-    StringsPager that inserts the small counter
-    in the upper left corner of curses window
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(PagerWithUptime, self).__init__(*args, **kwargs)
-        self.start_time = datetime.now()
-
-    @property
-    def _last_update_timestamp(self):
-        delta = datetime.now() - self.start_time
-        delta = text_type(delta)
-        # chop off microseconds
-        return delta.split('.')[0]
-
-    def update(self):
-        redraw = super(PagerWithUptime, self).update()
-        if redraw:
-            self.put_line(self._last_update_timestamp,
-                          y_position=0, start_index=0)
-            self.move_cursor(self.current_draw_position, 0)
-
-        return redraw
-
-
-def draw_solution(board_def, draw_final=False, box_symbol=None, curses_animation=False, **solver_args):
+def draw_solution(board_def, draw_final=False, **solver_args):
     """Solve the given board in terminal with animation"""
+    d_board = make_board(*board_def, renderer=BaseAsciiRenderer)
 
-    with ignored(locale.Error):
-        # to correctly print non-ASCII box symbols
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
-    if curses_animation:
-        if draw_final:
-            logging.warning('No need to use curses with draw_final=True')
-            curses_animation = False
-
-    if curses_animation:
-        board_queue = queue.Queue()
-        d_board = make_board(
-            *board_def, renderer=CursesRenderer, stream=board_queue)
-
-        if box_symbol is not None:
-            d_board.renderer.icons.update({BOX: box_symbol})
-
-        thread = Thread(target=solve, args=(d_board,), kwargs=solver_args)
-        thread.daemon = True
-        thread.start()
-        curses.wrapper(PagerWithUptime.draw, board_queue)
-    else:
-        d_board = make_board(*board_def, renderer=BaseAsciiRenderer)
-
-        if box_symbol is not None:
-            d_board.renderer.icons.update({BOX: box_symbol})
-
-        solve(d_board, draw_final=draw_final, **solver_args)
+    solve(d_board, draw_final=draw_final, **solver_args)
 
 
 def main():
@@ -134,8 +71,7 @@ def main():
 
     board_def = read_example("hello.txt")
     board_def = (columns, rows)
-    box_symbol = '#'
-    draw_solution(board_def, box_symbol=box_symbol)
+    draw_solution(board_def)
 
 
 if __name__ == '__main__':
