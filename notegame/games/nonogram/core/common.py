@@ -3,7 +3,6 @@
 Defines the basic terms and functions for nonogram game
 """
 
-from enum import Enum
 
 from notetool.tool.log import logger
 from six import integer_types, iteritems, string_types, with_metaclass
@@ -30,14 +29,6 @@ class NonogramError(ValueError):
     Represents an error occurred when trying
     to solve a nonogram which has an internal contradiction.
     """
-
-
-class BlackAndWhite(Enum):
-    """
-    Enums are faster than simple integers
-    """
-    WHITE = Color.white().id_
-    BLACK = Color.black().id_
 
 
 def invert(cell_state):

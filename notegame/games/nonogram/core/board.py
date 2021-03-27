@@ -4,13 +4,14 @@ from collections import namedtuple
 from copy import copy
 
 import numpy as np
+from notetool.tool.log import logger
+from six.moves import map, range, zip
+
 from notegame.games.nonogram.core.common import (BOX, SPACE, UNKNOWN, invert,
                                                  is_color_cell,
                                                  normalize_description)
 from notegame.games.nonogram.core.renderer import Renderer
 from notegame.games.nonogram.utils.iter import avg
-from notetool.tool.log import logger
-from six.moves import map, range, zip
 
 
 class CellPosition(namedtuple('Cell', 'row_index column_index')):
@@ -910,7 +911,7 @@ def _solve_on_space_hints(board, hints):
         board.cells[i] = solution
 
 
-def make_board(*args, **kwargs):
+def make_board(*args, **kwargs)->NumpyBlackBoard:
     """Produce the black-and-white or colored nonogram"""
 
     if len(args) != 2:

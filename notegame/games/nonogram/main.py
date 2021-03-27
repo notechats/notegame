@@ -10,11 +10,6 @@ from notegame.games.nonogram.core.board import make_board
 from notegame.games.nonogram.core.renderer import BaseAsciiRenderer
 from notegame.games.nonogram.reader import read_example
 
-try:
-    import curses
-except ImportError:
-    curses = None
-
 
 def solve(d_board, draw_final=False, draw_probes=False, **solver_args):
     """
