@@ -15,7 +15,6 @@ from ..core.common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, NonogramError,
 from ..utils import fsm
 from ..utils.cache import Cache
 from ..utils.iter import expand_generator
-from ..utils.other import from_two_powers, two_powers
 from .base import BaseLineSolver
 from .simpson import FastSolver
 
@@ -386,41 +385,6 @@ class TransitionTable(list):
             yield tuple(step_possible_cell_types)
 
 
-class NonogramFSMColored(NonogramFSM):
-    """
-    FSM-based line solver for colored puzzles
-    """
-
-    @classmethod
-    def _space(cls):
-        return SPACE_COLORED
-
-    @classmethod
-    def _can_be_space(cls, cell):
-        return bool(cell & cls._space())
-
-    @classmethod
-    def _types_for_cell(cls, cell):
-        return two_powers(cell)
-
-    @classmethod
-    def _cell_value_from_solved(cls, states):
-        # assert states.size
-        return from_two_powers(states)
-
-    def match(self, word):
-        one_color_word = []
-
-        for letter in word:
-            letter = two_powers(letter)
-            if len(letter) == 1:
-                letter = letter[0]
-
-            one_color_word.append(letter)
-
-        return super(NonogramFSMColored, self).match(one_color_word)
-
-
 class BaseMachineSolver(BaseLineSolver):
     """
     Nonogram line solver that uses finite state machine
@@ -498,13 +462,6 @@ class ReverseTrackingSolver(BaseReverseTrackingSolver):
 
         # it's a complete solution, so other solvers can use it too
         FastSolver.save_in_cache(original, solved)
-
-
-class ReverseTrackingColoredSolver(BaseReverseTrackingSolver):
-    """
-    FSM Nonogram solver for colored puzzles
-    """
-    NFSM_CLASS = NonogramFSMColored
 
 
 def assert_match(row_desc, row):

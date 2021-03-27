@@ -12,7 +12,7 @@ from six.moves import range
 from notegame.games.nonogram.core import propagation
 from notegame.games.nonogram.core.board import CellPosition, CellState
 from notegame.games.nonogram.core.common import NonogramError
-from notegame.games.nonogram.core.line.base import cache_info
+from notegame.games.nonogram.solver.base import cache_info
 from notegame.games.nonogram.utils.iter import expand_generator
 from notegame.games.nonogram.utils.priority_dict import PriorityDict
 
