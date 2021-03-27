@@ -6,24 +6,11 @@ See details in the work 'An Efficient Approach to Solving Nonograms':
 https://ir.nctu.edu.tw/bitstream/11536/22772/1/000324586300005.pdf
 """
 
-from __future__ import unicode_literals
-
-import logging
-
 from six.moves import zip
 
-from pynogram.core.common import (
-    UNKNOWN, BOX,
-    SPACE, SPACE_COLORED,
-    partial_sums,
-)
-from pynogram.core.line.base import (
-    BaseLineSolver,
-    NonogramError,
-)
-from pynogram.utils.other import from_two_powers
-
-LOG = logging.getLogger(__name__)
+from ..core.common import BOX, SPACE, SPACE_COLORED, UNKNOWN, partial_sums
+from ..utils.other import from_two_powers
+from .base import BaseLineSolver, NonogramError
 
 
 class EfficientSolver(BaseLineSolver):

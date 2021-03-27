@@ -4,10 +4,9 @@
 from notetool.tool.log import logger
 from six import add_metaclass, iteritems, itervalues
 
-from notegame.games.nonogram.core.common import (SPACE_COLORED, BlottedBlock,
-                                                 NonogramError)
-from notegame.games.nonogram.utils.cache import Cache
-from notegame.games.nonogram.utils.other import two_powers
+from ..core.common import SPACE_COLORED, BlottedBlock, NonogramError
+from ..utils.cache import Cache
+from ..utils.other import two_powers
 
 
 class TwoLayerCache(Cache):
