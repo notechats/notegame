@@ -9,8 +9,7 @@ from notetool.tool.log import logger
 
 class Cache(object):
     """
-    Presents the simple dictionary
-    with size limit and hit counter.
+    具有大小限制和命中计数器的简单词典。
     """
 
     def __init__(self, max_size=10 ** 5, increase=False, do_not_increase_after=10 ** 6):
@@ -43,7 +42,8 @@ class Cache(object):
         """Write the value to cache."""
 
         if len(self) >= self.max_size:
-            logger.warning('Maximum size for cache reached (%s).', self.max_size)
+            logger.warning(
+                'Maximum size for cache reached (%s).', self.max_size)
             self._clear()
             self._increase_size()
 

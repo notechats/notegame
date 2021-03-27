@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 """Define nonogram solving operations"""
 
-from __future__ import print_function, unicode_literals
-
-import logging
-
+from notetool.tool.log import logger
 from six import add_metaclass, iteritems, itervalues
 
-from ...utils.cache import Cache
-from ...utils.other import two_powers
-from ..common import SPACE_COLORED, BlottedBlock, NonogramError
-
-LOG = logging.getLogger(__name__)
+from notegame.games.nonogram.core.common import (SPACE_COLORED, BlottedBlock,
+                                                 NonogramError)
+from notegame.games.nonogram.utils.cache import Cache
+from notegame.games.nonogram.utils.other import two_powers
 
 
 class TwoLayerCache(Cache):
     """
-    Special cache for storing nonograms line solutions.
+    Special cache for storing nonogram line solutions.
     The keys are pairs (clue, partial_solution)
     """
 
@@ -119,12 +115,12 @@ class BaseLineSolver(object):
         return solved
 
     @classmethod
-    def save_in_cache(self, original, solved):
+    def save_in_cache(cls, original, solved):
         """
         Put the solution in local cache.
         Use solved=False to show that the line is not solvable.
         """
-        self.solutions_cache.save(original, solved)
+        cls.solutions_cache.save(original, solved)
 
     def _solve(self):
         """
@@ -250,7 +246,8 @@ class TrimmedSolver(BaseLineSolver):
 
     @classmethod
     def _trim_solved_blocks(cls, description, line):
-        LOG.info('Trying to trim off solved cells: %r, %r', description, line)
+        logger.info('Trying to trim off solved cells: %r, %r',
+                    description, line)
 
         beg_solved, beg_blocks = cls.starting_solved(
             list(description), list(line))
@@ -288,9 +285,9 @@ class TrimmedSolver(BaseLineSolver):
 
         description, line, edges = cls._trim_solved_blocks(description, line)
         if any(edges):
-            LOG.info('Trimmed edges: %r, %r', *edges)
-            LOG.info('What is left after trimming: description %r and line %r',
-                     description, line)
+            logger.info('Trimmed edges: %r, %r', *edges)
+            logger.info('What is left after trimming: description %r and line %r',
+                        description, line)
         if not line:  # all the cells are solved
             solved = edges[0]
         else:
