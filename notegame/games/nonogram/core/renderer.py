@@ -4,17 +4,14 @@ Defines various renderers for the game of nonogram
 """
 
 from abc import ABC
-from itertools import combinations
 from sys import stdout
 
 from notetool.tool.log import logger
-from six import integer_types, iteritems, itervalues, text_type
+from six import integer_types, itervalues, text_type
 
-from notegame.games.nonogram.core.common import (BOX, SPACE, SPACE_COLORED,
-                                                 UNKNOWN, BlottedBlock, Color,
-                                                 is_color_cell, is_list_like)
-from notegame.games.nonogram.utils.iter import max_safe, pad, split_seq
-from notegame.games.nonogram.utils.other import from_two_powers, two_powers
+from ..utils.iter import max_safe, pad
+from ..utils.other import two_powers
+from .common import BOX, SPACE, UNKNOWN, BlottedBlock, is_list_like
 
 
 class Cell(object):
