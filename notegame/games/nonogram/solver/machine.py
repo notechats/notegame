@@ -10,17 +10,14 @@ from notetool.tool.log import logger
 from six import iteritems, itervalues
 from six.moves import range
 
-from notegame.games.nonogram.core.common import (BOX, SPACE, SPACE_COLORED,
-                                                 UNKNOWN, NonogramError,
-                                                 is_list_like,
-                                                 normalize_description,
-                                                 normalize_row)
-from notegame.games.nonogram.core.line.base import BaseLineSolver
-from notegame.games.nonogram.core.line.simpson import FastSolver
-from notegame.games.nonogram.utils import fsm
-from notegame.games.nonogram.utils.cache import Cache
-from notegame.games.nonogram.utils.iter import expand_generator
-from notegame.games.nonogram.utils.other import from_two_powers, two_powers
+from ..core.common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, NonogramError,
+                           is_list_like, normalize_description, normalize_row)
+from ..utils import fsm
+from ..utils.cache import Cache
+from ..utils.iter import expand_generator
+from ..utils.other import from_two_powers, two_powers
+from .base import BaseLineSolver
+from .simpson import FastSolver
 
 
 class NonogramFSM(fsm.FiniteStateMachine):
