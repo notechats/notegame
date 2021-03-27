@@ -114,7 +114,7 @@ class Solver(object):
         :type cell_state: CellState
         """
         board = self.board
-        logger.debug('Assume that (%i, %i) is %s', *tuple(cell_state))
+        logger.debug('Assume that (%i, %i) is %s' % (*tuple(cell_state)))
 
         board.set_color(cell_state)
 
@@ -156,7 +156,8 @@ class Solver(object):
                 return False, None
 
         if assumption not in board.cell_colors(pos):
-            logger.warning("The probe is useless: color '%s' already unset", assumption)
+            logger.warning(
+                "The probe is useless: color '%s' already unset" % (assumption))
             return False, None
 
         save = board.make_snapshot()
@@ -184,7 +185,7 @@ class Solver(object):
             before_contradiction = None
 
         pos = cell_state.position
-        logger.info('Found contradiction at (%i, %i)', *pos)
+        logger.info('Found contradiction at (%i, %i)' % (*pos))
         try:
             board.unset_color(cell_state)
         except ValueError as ex:
@@ -206,8 +207,8 @@ class Solver(object):
         changed = list(board.changed(previous_board))
         assumption = cell_state.color
         log_contradiction = '(not) ' if is_contradiction else ''
-        logger.info('Changed %d cells with %s%s assumption',
-                    len(changed), log_contradiction, assumption)
+        logger.info('Changed %d cells with %s%s assumption' %
+                    (len(changed), log_contradiction, assumption))
 
         # add the neighbours of the changed cells into jobs
         for pos in changed:
@@ -220,13 +221,15 @@ class Solver(object):
 
     def _set_guess(self, state):
         board = self.board
-        is_contradiction, prev_board = self.probe(state, rollback=False, force=True)
+        is_contradiction, prev_board = self.probe(
+            state, rollback=False, force=True)
 
         if is_contradiction:
             raise NonogramError('Real contradiction was found: %s' % (state,))
 
         if prev_board is None:
-            logger.warning("The probe for state '%s' does not return anything new", state)
+            logger.warning(
+                "The probe for state '%s' does not return anything new" % state)
             return ()
 
         if board.is_solved_full:
@@ -257,7 +260,7 @@ class Solver(object):
         while jobs:
             state, priority = jobs.pop_smallest()
             counter += 1
-            logger.info('Probe #%d: %s (%f)', counter, state, priority)
+            logger.info('Probe #%d: %s (%f)' % (counter, state, priority))
 
             # if the job is only coordinates
             # then try all the possible colors
@@ -300,8 +303,7 @@ class Solver(object):
                 processed_in_round.add(pos)
             elif expired_assumptions:
                 logger.warning('No more jobs. Refill all the jobs processed before '
-                               'the last found contradiction (%s)',
-                               len(expired_assumptions))
+                               'the last found contradiction (%s)' % (len(expired_assumptions)))
                 refill_processed = self._get_all_unsolved_jobs(
                     choose_from_cells=expired_assumptions)
                 for new_job, priority in iteritems(refill_processed):
@@ -336,7 +338,8 @@ class Solver(object):
             # if rate > jobs_with_rates.get(job, 0):
             jobs_with_rates[pos][color] = rate
 
-        max_rate = {pos: max(v.values()) for pos, v in iteritems(jobs_with_rates)}
+        max_rate = {pos: max(v.values())
+                    for pos, v in iteritems(jobs_with_rates)}
         # the biggest rate appears first
         best = sorted(iteritems(max_rate), key=lambda x: x[1], reverse=True)
         if FEW_COLORS_FIRST:
@@ -344,7 +347,8 @@ class Solver(object):
         logger.debug('\n'.join(map(str, best)))
 
         for pos, max_rate in best:
-            colors = sorted(iteritems(jobs_with_rates[pos]), key=lambda x: x[1], reverse=True)
+            colors = sorted(
+                iteritems(jobs_with_rates[pos]), key=lambda x: x[1], reverse=True)
             for color, rate in colors:
                 yield CellState.from_position(pos, color)
 
@@ -353,7 +357,8 @@ class Solver(object):
 
         if choose_from_cells is None:
             # add every cell
-            choose_from_cells = product(range(board.height), range(board.width))
+            choose_from_cells = product(
+                range(board.height), range(board.width))
 
         probe_jobs = PriorityDict()
 
@@ -399,24 +404,30 @@ class Solver(object):
 
             for index, candidate in enumerate(candidates):  # type: CellState
                 if candidate.row_index < skip_first_rows:
-                    raise ValueError('Bad candidate: %r. The row skipped' % candidate)
+                    raise ValueError(
+                        'Bad candidate: %r. The row skipped' % candidate)
 
                 row_index, col_index, color = candidate
-                new_candidate = CellState(row_index - skip_first_rows, col_index, color)
+                new_candidate = CellState(
+                    row_index - skip_first_rows, col_index, color)
                 candidates[index] = new_candidate
-                logger.info('Fixed candidate: %r -> %r', candidate, new_candidate)
+                logger.info('Fixed candidate: %r -> %r' %
+                            (candidate, new_candidate))
 
         if solved_columns and solved_columns[0]:
             skip_first_columns = len(solved_columns[0])
 
             for index, candidate in enumerate(candidates):  # type: CellState
                 if candidate.column_index < skip_first_columns:
-                    raise ValueError('Bad candidate: %r. The column skipped' % candidate)
+                    raise ValueError(
+                        'Bad candidate: %r. The column skipped' % candidate)
 
                 row_index, col_index, color = candidate
-                new_candidate = CellState(row_index, col_index - skip_first_columns, color)
+                new_candidate = CellState(
+                    row_index, col_index - skip_first_columns, color)
                 candidates[index] = new_candidate
-                logger.info('Fixed candidate: %r -> %r', candidate, new_candidate)
+                logger.info('Fixed candidate: %r -> %r',
+                            candidate, new_candidate)
 
         return candidates
 
@@ -428,20 +439,21 @@ class Solver(object):
                 logger.warning('Bad candidate %r', candidate)
                 continue
 
-            new_candidate = CellState(row_index, col_index, color_mapping[color])
+            new_candidate = CellState(
+                row_index, col_index, color_mapping[color])
             candidates[index] = new_candidate
             logger.info('Fixed candidate: %r -> %r', candidate, new_candidate)
 
         return candidates
 
-    def solve(self):
+    def solve(self, methods=None):
         """
         Solve the nonogram to the most with contradictions
         """
 
         board = self.board
 
-        propagation.solve(board)
+        propagation.solve(board, methods=methods)
         if board.is_solved_full:
             board.set_finished()
             logger.info('No need to solve with contradictions')
@@ -450,7 +462,8 @@ class Solver(object):
         logger.warning('Trying to solve using contradictions method')
         start = time.time()
 
-        found_contradictions, best_candidates = self._solve_without_search(to_the_max=True)
+        found_contradictions, best_candidates = self._solve_without_search(
+            to_the_max=True)
         current_solution_rate = board.solution_rate
         logger.warning('Contradictions (found %d): %f',
                        found_contradictions, current_solution_rate)
@@ -459,7 +472,8 @@ class Solver(object):
             # if stalled with sophisticated selection of cells
             # do the brute force search
             logger.warning('Starting DFS (intelligent brute-force)')
-            best_candidates = self.shrink_board(board, candidates=best_candidates)
+            best_candidates = self.shrink_board(
+                board, candidates=best_candidates)
             if board.is_colored:
                 single_colored, color_mapping = board.reduce_to_single_color()
                 if single_colored is not None:
@@ -468,7 +482,8 @@ class Solver(object):
 
                     # from now we will search the black and white board
                     self.board = single_colored
-                    best_candidates = self._fix_candidates_colors(best_candidates, color_mapping)
+                    best_candidates = self._fix_candidates_colors(
+                        best_candidates, color_mapping)
 
             self.search(best_candidates)
             board.restore_reduced()
@@ -486,7 +501,8 @@ class Solver(object):
         for method, info in cache_info().items():
             size, hit_rate = info
             if size > 0:
-                logger.warning('%s cache: size=%d, hit rate=%.4f%%', method, size, hit_rate * 100.0)
+                logger.warning('%s cache: size=%d, hit rate=%.4f%%',
+                               method, size, hit_rate * 100.0)
 
     def _limits_reached(self, depth):
         """
@@ -706,7 +722,8 @@ class Solver(object):
                         if color == assumption:
                             continue
 
-                        states_to_try.append(CellState.from_position(pos, color))
+                        states_to_try.append(
+                            CellState.from_position(pos, color))
 
                     # if all(self._is_explored(path + (state,)) for state in states_to_try):
                     #     LOG.warning('All other colors (%s) of cell %s already explored',
