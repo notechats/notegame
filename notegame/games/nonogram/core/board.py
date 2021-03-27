@@ -804,7 +804,7 @@ class BlackBoard(BaseBoard):
                 # also need at least one space between every two blocks
                 need_cells += len(clue) - 1
 
-            logger.debug('Clue: %s; Need: %s; Available: %s.', clue, need_cells, max_size)
+            logger.debug('Clue: %s; Need: %s; Available: %s.'% (clue, need_cells, max_size))
             if need_cells > max_size:
                 raise ValueError('Cannot allocate clue {} in just {} cells'.format(
                     list(clue), max_size))
