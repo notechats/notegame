@@ -3,8 +3,6 @@
 Defines methods to parse data file with the board defined
 """
 
-from __future__ import print_function, unicode_literals
-
 import json
 import os
 import re
@@ -13,16 +11,13 @@ from xml.etree import ElementTree
 
 from six import PY2, binary_type, string_types
 from six.moves import range
-# I don't want interpolation features, so RawConfigParser (not ConfigParser)
-# noinspection PyUnresolvedReferences
 from six.moves.configparser import RawConfigParser
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
 
+from notegame.games.nonogram.core.color import Color, ColorBlock, ColorMap
 from pynogram.core.common import BlottedBlock, clues
 from pynogram.utils.iter import expand_generator
-
-from .core.color import Color, ColorBlock, ColorMap
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
