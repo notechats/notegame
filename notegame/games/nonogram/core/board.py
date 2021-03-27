@@ -1,46 +1,28 @@
 # -*- coding: utf-8 -*-
-"""
-Define a board of nonogram game
-"""
 
-from __future__ import division, print_function, unicode_literals
 
+from abc import ABC
 from collections import defaultdict, namedtuple
 from copy import copy
 
+import numpy as np
 from memoized import memoized
 from six.moves import map, range, zip
 
-from ..utils.cache import init_once
-from ..utils.iter import avg
-from ..utils.other import (from_two_powers, get_named_logger, ignored,
-                           two_powers)
-
-from .color import ColorBlock, normalize_description_colored
-from .common import (BOX, SPACE, SPACE_COLORED, UNKNOWN, BlottedBlock,
-                     NonogramError, invert, is_color_cell,
-                     normalize_description, partial_sums, slack_space)
-from .renderer import Renderer
-
-try:
-    from abc import ABC
-except ImportError:
-    from abc import ABCMeta
-
-    # https://stackoverflow.com/a/38668373
-    ABC = ABCMeta(str('ABC'), (object,), {'__slots__': ()})
-
-
-
-try:
-    # noinspection PyPackageRequirements
-    import numpy as np
-except ImportError:
-    np = None
-
-
-
-
+from notegame.games.nonogram.core.color import (ColorBlock,
+                                                normalize_description_colored)
+from notegame.games.nonogram.core.common import (BOX, SPACE, SPACE_COLORED,
+                                                 UNKNOWN, BlottedBlock,
+                                                 NonogramError, invert,
+                                                 is_color_cell,
+                                                 normalize_description,
+                                                 partial_sums, slack_space)
+from notegame.games.nonogram.core.renderer import Renderer
+from notegame.games.nonogram.utils.cache import init_once
+from notegame.games.nonogram.utils.iter import avg
+from notegame.games.nonogram.utils.other import (from_two_powers,
+                                                 get_named_logger, ignored,
+                                                 two_powers)
 
 LOG = get_named_logger(__name__, __file__)
 
@@ -65,7 +47,6 @@ class CellState(namedtuple('CellState', 'row_index column_index color')):
 
 def call_if_callable(func, *args, **kwargs):
     """Call the function with given parameters if it is callable"""
-
     if func and callable(func):
         return func(*args, **kwargs)
 
