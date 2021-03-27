@@ -238,7 +238,8 @@ class SolvableGrid(NonogramGrid, ABC):
     """
 
     def __init__(self, columns, rows, cells=None, **kwargs):
-        super(SolvableGrid, self).__init__(columns, rows, cells=cells, **kwargs)
+        super(SolvableGrid, self).__init__(
+            columns, rows, cells=cells, **kwargs)
 
         self._finished = False
 
@@ -322,7 +323,8 @@ class MultipleSolutionGrid(NonogramGrid, ABC):
     """
 
     def __init__(self, columns, rows, cells=None, **renderer_params):
-        super(MultipleSolutionGrid, self).__init__(columns, rows, cells=cells, **renderer_params)
+        super(MultipleSolutionGrid, self).__init__(
+            columns, rows, cells=cells, **renderer_params)
 
         self.solutions = []
 
@@ -355,7 +357,8 @@ class MultipleSolutionGrid(NonogramGrid, ABC):
                             assert new_cell == old_cell
 
                     elif new_cell != old_cell:
-                        assert old_cell == UNKNOWN  # '%s: %s --> %s' % ((i, j), old_cell, new_cell)
+                        # '%s: %s --> %s' % ((i, j), old_cell, new_cell)
+                        assert old_cell == UNKNOWN
                         yield i, j
 
     def changed(self, old_cells):
@@ -389,11 +392,13 @@ class MultipleSolutionGrid(NonogramGrid, ABC):
                 LOG.info('The solution is the same as the %d-th', i)
                 if i > 2:
                     # faster to find repeated solutions that appear lately
-                    LOG.debug('Move found solution to the beginning of the list')
+                    LOG.debug(
+                        'Move found solution to the beginning of the list')
                     self.solutions.insert(0, self.solutions.pop(i))
                 return True
 
-            LOG.info('The solution differs from %d-th one: first differ cell: %s', i, diff)
+            LOG.info(
+                'The solution differs from %d-th one: first differ cell: %s', i, diff)
 
         return False
 
@@ -450,7 +455,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
     """
 
     def __init__(self, columns, rows, cells=None, **renderer_params):
-        super(ReducibleGrid, self).__init__(columns, rows, cells=cells, **renderer_params)
+        super(ReducibleGrid, self).__init__(
+            columns, rows, cells=cells, **renderer_params)
 
         # save original descriptions to support reducing
         self.descriptions = (self.columns_descriptions, self.rows_descriptions)
@@ -481,7 +487,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
             if line_solution_rate_func(row_index) != 1:
                 break
 
-            LOG.info('Reducing solved row (column) %i: %r', row_index, row_desc)
+            LOG.info('Reducing solved row (column) %i: %r',
+                     row_index, row_desc)
 
             if first:
                 # remove from the board description
@@ -507,8 +514,10 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
                 if cell == cls._space_value():
                     continue
 
-                LOG.info('Reducing orthogonal description %i: %r', col_index, col_desc)
-                cls._reduce_orthogonal_description(col_desc, cell, first_rows=first)
+                LOG.info('Reducing orthogonal description %i: %r',
+                         col_index, col_desc)
+                cls._reduce_orthogonal_description(
+                    col_desc, cell, first_rows=first)
 
         return solved_rows, cells
 
@@ -523,8 +532,10 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         1  ? X ? 0          1 ? X ?
         """
 
-        columns_descriptions = [list(col_desc) for col_desc in self.columns_descriptions]
-        rows_descriptions = [list(row_desc) for row_desc in self.rows_descriptions]
+        columns_descriptions = [list(col_desc)
+                                for col_desc in self.columns_descriptions]
+        rows_descriptions = [list(row_desc)
+                             for row_desc in self.rows_descriptions]
 
         original_size = self.height, self.width
 
@@ -546,7 +557,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         # ====== COLS ====== #
         # transpose the matrix
         width = len(cells[0])
-        cells = [list(self.get_column(col_index)) for col_index in range(width)]
+        cells = [list(self.get_column(col_index))
+                 for col_index in range(width)]
         first_solved_columns, cells = self._reduce_edge(
             cells, columns_descriptions, rows_descriptions,
             self.column_solution_rate, first=True)
@@ -554,7 +566,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         # transpose it back
         height = len(cells[0])
         # to correctly check line_solution_rate further
-        self.restore([[col[row_index] for col in cells] for row_index in range(height)])
+        self.restore([[col[row_index] for col in cells]
+                      for row_index in range(height)])
 
         last_solved_columns, cells = self._reduce_edge(
             cells, columns_descriptions, rows_descriptions,
@@ -563,16 +576,19 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         # transpose it back
         height = len(cells[0])
         # to correctly check line_solution_rate further
-        self.restore([[col[row_index] for col in cells] for row_index in range(height)])
+        self.restore([[col[row_index] for col in cells]
+                      for row_index in range(height)])
 
         self.columns_descriptions = self.normalize(columns_descriptions)
         self.rows_descriptions = self.normalize(rows_descriptions)
 
         for sol_index, solution in enumerate(self.solutions):
             if first_solved_columns:
-                solution = [row[len(first_solved_columns):] for row in solution]
+                solution = [row[len(first_solved_columns):]
+                            for row in solution]
             if last_solved_columns:
-                solution = [row[:-len(last_solved_columns)] for row in solution]
+                solution = [row[:-len(last_solved_columns)]
+                            for row in solution]
 
             if first_solved_rows:
                 solution = solution[len(first_solved_rows):]
@@ -589,7 +605,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         if original_size == reduced_size:
             LOG.warning('The board size: %r', original_size)
         else:
-            LOG.warning('Reduced the board: %r --> %r', original_size, reduced_size)
+            LOG.warning('Reduced the board: %r --> %r',
+                        original_size, reduced_size)
 
         self.solved_columns = (first_solved_columns, last_solved_columns)
         self.solved_rows = (first_solved_rows, last_solved_rows)
@@ -654,11 +671,13 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         assert reduced_size == (len(current), len(current[0]))
 
         for sol_index, solution in enumerate(self.solutions):
-            cells = self.restore_cells(solution, self.solved_rows, self.solved_columns)
+            cells = self.restore_cells(
+                solution, self.solved_rows, self.solved_columns)
             self.restore(cells)
             self.solutions[sol_index] = self.cells
 
-        cells = self.restore_cells(current, self.solved_rows, self.solved_columns)
+        cells = self.restore_cells(
+            current, self.solved_rows, self.solved_columns)
         self.restore(cells)
 
         self.columns_descriptions, self.rows_descriptions = self.descriptions
@@ -667,7 +686,8 @@ class ReducibleGrid(SolvableGrid, MultipleSolutionGrid, ABC):
         assert original_size == (len(self.cells), len(self.cells[0]))
 
         if original_size != reduced_size:
-            LOG.warning('Restored the board: %r --> %r', reduced_size, original_size)
+            LOG.warning('Restored the board: %r --> %r',
+                        reduced_size, original_size)
 
 
 class BaseBoard(ReducibleGrid, ABC):
@@ -679,7 +699,8 @@ class BaseBoard(ReducibleGrid, ABC):
     """
 
     def __init__(self, columns, rows, cells=None, **renderer_params):
-        super(BaseBoard, self).__init__(columns, rows, cells=cells, **renderer_params)
+        super(BaseBoard, self).__init__(
+            columns, rows, cells=cells, **renderer_params)
 
         # True =_column; False = row
         self.densities = {
@@ -751,7 +772,8 @@ class NumpyBoard(BaseBoard, ABC):
     """
 
     def __init__(self, columns, rows, cells=None, **renderer_params):
-        super(NumpyBoard, self).__init__(columns, rows, cells=cells, **renderer_params)
+        super(NumpyBoard, self).__init__(
+            columns, rows, cells=cells, **renderer_params)
         self.restore(self.cells)
 
     def get_column(self, index):
@@ -825,7 +847,8 @@ class BlackBoard(BaseBoard):
     def unset_color(self, cell_state):
         row_index, column_index, bad_state = cell_state
         if self.cells[row_index][column_index] != UNKNOWN:
-            raise ValueError('Cannot unset already set cell %s' % ([row_index, column_index]))
+            raise ValueError('Cannot unset already set cell %s' %
+                             ([row_index, column_index]))
         self.cells[row_index][column_index] = invert(bad_state)
 
     @property
@@ -894,13 +917,15 @@ class ReduceColorToBlackMixin(MultipleSolutionGrid, ABC):
         columns_descriptions = []
         for col_desc in self.columns_descriptions:
             # filter out any other colors
-            new_desc = [block.size for block in col_desc if block.color == box_color]
+            new_desc = [
+                block.size for block in col_desc if block.color == box_color]
             columns_descriptions.append(new_desc)
 
         rows_descriptions = []
         for row_desc in self.rows_descriptions:
             # filter out any other colors
-            new_desc = [block.size for block in row_desc if block.color == box_color]
+            new_desc = [
+                block.size for block in row_desc if block.color == box_color]
             rows_descriptions.append(new_desc)
 
         color_mapping = {
@@ -921,17 +946,20 @@ class ReduceColorToBlackMixin(MultipleSolutionGrid, ABC):
             cells.append(new_row)
 
         # TODO: fix incorrect solution rate when using NumpyBoard
-        new_board = make_board(columns_descriptions, rows_descriptions, use_numpy=False)
+        new_board = make_board(columns_descriptions,
+                               rows_descriptions, use_numpy=False)
         new_board.restore(cells)
 
-        self._assign_callbacks_to_single_colored_board(new_board, color_mapping)
+        self._assign_callbacks_to_single_colored_board(
+            new_board, color_mapping)
         return new_board
 
     def _assign_callbacks_to_single_colored_board(self, new_board, color_to_single_mapping):
         from pynogram.core import propagation
 
         updatable_colors = tuple(color_to_single_mapping.keys())
-        single_to_color = dict((v, k) for k, v in color_to_single_mapping.items())
+        single_to_color = dict((v, k)
+                               for k, v in color_to_single_mapping.items())
 
         def on_column_update(column_index, board):
             column = board.get_column(column_index)
@@ -1018,7 +1046,8 @@ class ColorBoard(BaseBoard, ReduceColorToBlackMixin):
         :type color_map: ColorMap
         """
         self.color_map = color_map
-        super(ColorBoard, self).__init__(columns, rows, cells=cells, **renderer_params)
+        super(ColorBoard, self).__init__(
+            columns, rows, cells=cells, **renderer_params)
 
         self._cell_rate_memo = {}
         self._reduce_colors()
@@ -1149,7 +1178,8 @@ class ColorBoard(BaseBoard, ReduceColorToBlackMixin):
             return self._cell_rate_memo[cell]
         except KeyError:
             full_colors = self._all_colors_as_single_number()
-            self._cell_rate_memo[cell] = value = _color_cell_solution_rate(cell, full_colors)
+            self._cell_rate_memo[cell] = value = _color_cell_solution_rate(
+                cell, full_colors)
             return value
 
     def is_cell_solved(self, position):
@@ -1207,7 +1237,8 @@ class ColorBoard(BaseBoard, ReduceColorToBlackMixin):
         """
         for row_index, (row, row_desc) in enumerate(zip(self.cells, self.rows_descriptions)):
             for column_index, (cell, column_desc) in enumerate(zip(row, self.columns_descriptions)):
-                new_color = self._desc_colors(row_desc) & self._desc_colors(column_desc)
+                new_color = self._desc_colors(
+                    row_desc) & self._desc_colors(column_desc)
                 new_color |= SPACE_COLORED
                 if new_color != cell:
                     LOG.info('Update cell (%i, %i): %i --> %i',
@@ -1299,7 +1330,8 @@ class ColorBoard(BaseBoard, ReduceColorToBlackMixin):
         for row in self.cells:
             all_colors |= set(row)
 
-        all_colors = [set(self.cell_as_color_set(color)) for color in all_colors]
+        all_colors = [set(self.cell_as_color_set(color))
+                      for color in all_colors]
         unsolved_colors = [color for color in all_colors if len(color) > 1]
 
         if not unsolved_colors or len(unsolved_colors) > 1:
@@ -1346,7 +1378,8 @@ def _color_cell_solution_rate(cell, all_colors):
     rate = full_size - current_size
     normalized_rate = rate / (full_size - 1)
 
-    assert 0 <= normalized_rate <= 1, 'Full: {}, Cell: {}'.format(all_colors, cell_colors)
+    assert 0 <= normalized_rate <= 1, 'Full: {}, Cell: {}'.format(
+        all_colors, cell_colors)
 
     # _all_colors_specific_cache[cell] = normalized_rate
     return normalized_rate
@@ -1354,10 +1387,6 @@ def _color_cell_solution_rate(cell, all_colors):
 
 class NumpyBlackBoard(BlackBoard, NumpyBoard):
     """Black-and-white board that uses numpy matrix to store the cells"""
-
-
-class NumpyColorBoard(ColorBoard, NumpyBoard):
-    """Colored board that uses numpy matrix to store the cells"""
 
 
 class BlottedBoardMixin(BaseBoard, ABC):
@@ -1385,125 +1414,6 @@ class BlottedBoardMixin(BaseBoard, ABC):
         return (slack + 1) ** BlottedBlock.how_many(description)
 
 
-class BlottedBlackBoard(BlackBoard, BlottedBoardMixin):
-    """Special kind of board that has blotted clues"""
-
-    @classmethod
-    def validate_descriptions_size(cls, descriptions, max_size):
-        descriptions = [BlottedBlock.replace_with_1(clue)
-                        for clue in descriptions]
-        return super(BlottedBlackBoard, cls).validate_descriptions_size(
-            descriptions, max_size)
-
-    def validate_colors(self, vertical, horizontal):
-        """Cannot validate boxes number in blotted puzzles"""
-
-    @classmethod
-    def desc_sum(cls, desc):
-        desc = BlottedBlock.replace_with_1(desc)
-        return super(BlottedBlackBoard, cls).desc_sum(desc)
-
-
-class BlottedColorBoard(ColorBoard, BlottedBoardMixin):
-    """Special kind of color board that has blotted clues"""
-
-    @classmethod
-    def validate_descriptions_size(cls, descriptions, max_size):
-        descriptions = [BlottedBlock.replace_with_1(clue)
-                        for clue in descriptions]
-        return super(BlottedColorBoard, cls).validate_descriptions_size(
-            descriptions, max_size)
-
-    def validate_colors(self, vertical, horizontal):
-        horizontal_colors = self._clue_colors(True)
-        vertical_colors = self._clue_colors(False)
-
-        if horizontal_colors != vertical_colors:
-            raise ValueError('Colors differ: {} (rows) and {} (columns)'.format(
-                horizontal_colors, vertical_colors))
-
-        not_defined_colors = horizontal_colors - set(self._color_map_ids)
-        if not_defined_colors:
-            raise ValueError('Some colors not defined: {}'.format(
-                tuple(not_defined_colors)))
-
-    @classmethod
-    def desc_sum(cls, desc):
-        desc = BlottedBlock.replace_with_1(desc)
-        return super(BlottedColorBoard, cls).desc_sum(desc)
-
-    @classmethod
-    def _line_color_ranges(cls, description, line_size):
-        """
-        For every color in the given description produce a valid position range
-        """
-        description = BlottedBlock.replace_with_1(description)
-        line_colors = two_powers(cls._desc_colors(description))
-        sums = partial_sums(description)
-        slack = slack_space(line_size, description)
-
-        indexes = dict()
-        for color in line_colors:
-            first_index = None
-            last_index = None
-            for block_index, block in enumerate(description):
-                if block.color != color:
-                    continue
-                if first_index is None:
-                    first_index = block_index
-                last_index = block_index
-
-            # color = self.rgb_for_color_name(color)
-
-            # start position of the first block of particular color
-            first_pos = sums[first_index] - description[first_index].size
-            # end position of the last block plus what's left
-            last_pos = (sums[last_index] - 1) + slack
-
-            indexes[color] = (first_pos, last_pos)
-
-        return indexes
-
-    def _reduce_colors(self):
-        width = self.width
-        rows_colors_range = []
-        for row_index, row_desc in enumerate(self.rows_descriptions):
-            colors_range = self._line_color_ranges(row_desc, width)
-            LOG.info("First and last block indexes for every color in %i-th row: %r",
-                     row_index, colors_range)
-
-            rows_colors_range.append(colors_range)
-
-        height = self.height
-        columns_colors_range = []
-        for col_index, col_desc in enumerate(self.columns_descriptions):
-            colors_range = self._line_color_ranges(col_desc, height)
-            LOG.info("First and last block indexes for every color in %i-th column: %r",
-                     col_index, colors_range)
-
-            columns_colors_range.append(colors_range)
-
-        for row_index, (row, row_colors) in enumerate(zip(self.cells, rows_colors_range)):
-            for col_index, (cell, col_colors) in enumerate(zip(row, columns_colors_range)):
-                new_cell_color = {SPACE_COLORED}
-                LOG.debug('Checking cell (%i, %i)...', row_index, col_index)
-                for color in self.colors():
-                    if color not in row_colors or color not in col_colors:
-                        continue
-
-                    row_range = row_colors[color]
-                    col_range = col_colors[color]
-
-                    LOG.debug('Checking color %i in ranges %r and %r', color, row_range, col_range)
-                    if (row_range[0] <= col_index <= row_range[1]) and (
-                            col_range[0] <= row_index <= col_range[1]):
-                        new_cell_color.add(color)
-
-                new_cell_color = from_two_powers(new_cell_color)
-                if new_cell_color != cell:
-                    LOG.info('Update cell (%i, %i): %i --> %i',
-                             row_index, col_index, cell, new_cell_color)
-                    row[col_index] = new_cell_color
 
 
 def _solve_on_space_hints(board, hints):
@@ -1526,30 +1436,7 @@ def _solve_on_space_hints(board, hints):
 def make_board(*args, **kwargs):
     """Produce the black-and-white or colored nonogram"""
 
-    if len(args) not in (2, 3):
+    if len(args) != 2:
         raise ValueError('Bad number of *args')
 
-    blotted = False
-    if any(map(BlottedBlock.how_many, args[0])) or any(map(BlottedBlock.how_many, args[1])):
-        blotted = True
-
-    use_numpy = kwargs.pop('use_numpy', True)
-    if len(args) == 2:
-        if blotted:
-            return BlottedBlackBoard(*args, **kwargs)
-
-        if use_numpy:
-            with ignored(AttributeError):
-                return NumpyBlackBoard(*args, **kwargs)
-
-        return BlackBoard(*args, **kwargs)
-
-    assert len(args) == 3
-    if blotted:
-        return BlottedColorBoard(*args, **kwargs)
-
-    if use_numpy:
-        with ignored(AttributeError):
-            return NumpyColorBoard(*args, **kwargs)
-
-    return ColorBoard(*args, **kwargs)
+    return NumpyBlackBoard(*args, **kwargs)
