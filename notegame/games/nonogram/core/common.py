@@ -3,21 +3,26 @@
 Defines the basic terms and functions for nonogram game
 """
 
+from enum import Enum
 
+from notetool.tool.log import logger
 from six import integer_types, iteritems, string_types, with_metaclass
 from six.moves import range
 
-from ..utils.iter import expand_generator, list_replace
-from ..utils.other import get_named_logger
-from .color import Color, ColorBlock
+from notegame.games.nonogram.core.color import Color, ColorBlock
+from notegame.games.nonogram.utils.iter import expand_generator, list_replace
 
-try:
-    from enum import Enum
-except ImportError:
-    Enum = object
+# this cell has to be solved
+UNKNOWN = None
 
+# but boolean constants are even faster than Enums
+BOX = True  # BlackAndWhite.BLACK
+SPACE = False  # BlackAndWhite.WHITE
 
-LOG = get_named_logger(__name__, __file__)
+# for colored puzzles only integer is allowed
+SPACE_COLORED = Color.white().id_
+
+BLACK_AND_WHITE_COLORS = (UNKNOWN, SPACE, BOX)
 
 
 class NonogramError(ValueError):
@@ -27,23 +32,12 @@ class NonogramError(ValueError):
     """
 
 
-UNKNOWN = None  # this cell has to be solved
-
-
 class BlackAndWhite(Enum):
     """
     Enums are faster than simple integers
     """
     WHITE = Color.white().id_
     BLACK = Color.black().id_
-
-
-# but boolean constants are even faster than Enums
-BOX = True  # BlackAndWhite.BLACK
-SPACE = False  # BlackAndWhite.WHITE
-
-# for colored puzzles only integer is allowed
-SPACE_COLORED = Color.white().id_
 
 
 def invert(cell_state):
@@ -109,14 +103,14 @@ def normalize_row(row):
     if is_color_list(row):
         return row
 
-    LOG.debug('All row symbols: %s', alphabet)
+    logger.debug('All row symbols: %s', alphabet)
     # save original for logs and debug
     original, row = row, list(row)
 
     for formal, informal in iteritems(INFORMAL_REPRESENTATIONS):
         informal = set(informal) & alphabet
         if not informal:
-            LOG.debug('Not found %r in a row', formal)
+            logger.debug('Not found %r in a row', formal)
             continue
 
         if len(informal) > 1:
@@ -126,7 +120,7 @@ def normalize_row(row):
                     ', '.join(sorted(informal)), formal, original))
 
         informal = informal.pop()
-        LOG.debug('Replace %r with a %r', informal, formal)
+        logger.debug('Replace %r with a %r', informal, formal)
         list_replace(row, informal, formal)
 
     assert set(row).issubset(FORMAL_ALPHABET)
@@ -136,9 +130,6 @@ def normalize_row(row):
 def is_list_like(value):
     """Whether value is tuple or list"""
     return isinstance(value, (tuple, list))
-
-
-BLACK_AND_WHITE_COLORS = (UNKNOWN, SPACE, BOX)
 
 
 def is_color_cell(value):
