@@ -16,8 +16,8 @@ from six.moves.urllib.error import HTTPError
 from six.moves.urllib.request import urlopen
 
 from notegame.games.nonogram.core.color import Color, ColorBlock, ColorMap
-from pynogram.core.common import BlottedBlock, clues
-from pynogram.utils.iter import expand_generator
+from notegame.games.nonogram.core.common import BlottedBlock, clues
+from notegame.games.nonogram.utils.iter import expand_generator
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
