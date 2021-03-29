@@ -122,7 +122,7 @@ def disconnect_ip(ip, port="5555"):
     return stdout, stderr
 
 
-class auto_adb():
+class AutoADB():
     def __init__(self):
         try:
             adb_path = 'adb'
@@ -191,9 +191,6 @@ class auto_adb():
             self.adb_path + ' shell getprop ro.build.version.release')
         output = process.read()
         return output
-
-    def adb_path(self):
-        return self.adb_path
 
 
 """
@@ -295,9 +292,9 @@ class auto_adb():
 例如：adb -s 13b6e4c4 shell input tap 400 400
 表示对13b6e4c4这台Android手机进行在屏幕上（400,400）坐标位置进行模拟的点击事件。
 """
-check_phone()
+# check_phone()
 
-# screenshot_to_local()
+# # screenshot_to_local()
 
-# click(109, 274)
-swipe(0, 500, 10, 800)
+# # click(109, 274)
+# swipe(0, 500, 10, 800)
