@@ -10,7 +10,7 @@ from io import StringIO
 
 from PIL import Image
 
-from .adb_path import AutoADB
+from .auto_adb import AutoADB
 
 adb = AutoADB()
 # SCREENSHOT_WAY 是截图方法，经过 check_screenshot 后，会自动递减，不需手动修改
