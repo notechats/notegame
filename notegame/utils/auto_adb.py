@@ -56,7 +56,7 @@ def screenshot_to_phone(file_path='/sdcard/screenshots.png'):
     stdout = stdout.decode("utf-8")
     stderr = stderr.decode("utf-8")
 
-    logging.info("screenshots and save to phone " + file_path)
+    logger.info("screenshots and save to phone " + file_path)
     return stdout, stderr
 
 
